@@ -1,6 +1,7 @@
 ﻿using Accord.Genetic;
 using AlgorytmGenetyczny.Classes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,84 +11,203 @@ namespace AlgorytmGenetyczny.GeneticThings
 {
     public class Chromosome : ChromosomeBase
     {
-        private Dictionary<ushort, City> _cities;
-        private Random r;
-        private ushort _basePoint;
-        public HashSet<ushort> Path { private set; get; }
-        private Dictionary<City, HashSet<ushort>> favoriteRoutes;  //Chromosome, for each city have it's route ranking, 
-        public Chromosome(int length, Dictionary<ushort, City> cities, Random r, ushort basePoint)
+        private static Dictionary<ushort, City> _cities;
+        private static Random r;
+        private static ushort _basePoint;
+        private static bool _doubled;
+        private static ushort _countsOfEdges;
+
+        public List<(ushort city, ushort cost)> Path { get; set; }
+        private ConcurrentDictionary<City, List<ushort>> FavoriteRoutes { set; get; }  //Chromosome, for each city have it's route ranking, 
+        public Chromosome(Dictionary<ushort, City> cities, Random rnd, ushort basePoint, bool doubled, ushort countsOfEdges)
         {
             _cities = cities;
             _basePoint = basePoint;
+            r = rnd;
+            _doubled = doubled;
+            _countsOfEdges = countsOfEdges;
+            FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>();
             Path = GeneratePath();
-            this.r = r;
+
         }
 
-        private HashSet<ushort> GeneratePath()
+        private Dictionary<ushort, IList<ushort>> FillLeftRoutes(Dictionary<ushort, IList<ushort>> dictionary)
         {
-            var tempPath = new HashSet<ushort>();
-            var usedRoutesDict = new Dictionary<ushort, IList<ushort>>();
+            foreach (var city in _cities)
+            {
+                dictionary[city.Key] = city.Value.Connections.Select(x => x.Key).ToList();
+                if (_doubled)
+                    dictionary[city.Key] = dictionary[city.Key].Concat(city.Value.Connections.Select(x => x.Key).ToList()).ToList();
+            }
+            return dictionary;
+        }
 
-            int i = 0;
-            ushort previousCityID = _basePoint;
-            City previousCity = _cities[previousCityID];
-            var routsCount = previousCity.Connections.Count;  // how much routes is possible from this City
-            var nextRoute = (ushort)r.Next(routsCount);  //random any route 
-            var target = previousCity.GetTargetNameById(nextRoute);
-            tempPath.Add(GetRouteID(previousCityID, target));   //dodać ewentualnie jeśli będzie potrzebne przy liczeniu fitness
-            //if (usedRoutesDict.ContainsKey(previousCityID))
-            //{
-            //    usedRoutesDict[previousCityID].RemoveAt(next - 1);
-            //    favoriteRoutes[previousCity].Add(rand.)
-            //}
-            //else
-            //{
-            usedRoutesDict[previousCityID] = new List<ushort>((IEnumerable<ushort>)Enumerable.Range(0, (int)routsCount).Where(x => x != nextRoute)); //Generate list with possible connections excluding next route
-            favoriteRoutes[previousCity] = new HashSet<ushort>() { nextRoute }; //Add nextRoute as most prefered for baseCity for this chromosome
-                                                                                //}
+        private List<(ushort city, ushort cost)> GeneratePath(ConcurrentDictionary<City, List<ushort>> prefered = null)
+        {
+            var tempPath = new List<(ushort city, ushort cost)>();
+            var leftRoutes = FillLeftRoutes(new Dictionary<ushort, IList<ushort>>());
+            ushort? endingCity = null;
+            var visitedEdges = new Dictionary<(ushort,ushort), object>();
+            Stack<ushort> stack = new Stack<ushort>();
+            ushort source;                                              // = _basePoint;
+            City previousCity = null;                                                  // = _cities[previousCityID];
+                                                                                       // (ushort)r.Next(routsCount);  //random any route 
+            ushort target = _basePoint;                                         // = previousCity.GetTargetNameById(nextRoute);
+            ushort tempTarget;
+            ushort randRoute;
+
+            stack.Push(_basePoint);
+
 
             while (true)
             {
-                previousCityID = previousCity.GetTargetNameById((ushort)(nextRoute - 1)); 
-                previousCity = _cities[previousCityID];
-                nextRoute = (ushort)r.Next(usedRoutesDict[previousCityID].Count);
-                target = previousCity.GetTargetNameById(nextRoute);
-
-                if () /// check if usedRoutesDict[previousCityID].Count > 0 (czy mogę gdzieś jeszcze pójść? Co jeśli nie? T_T (TEORIA Grafu eulerofskiego) 
-
-                    //...
-                    //...
-                    //...
-
-                    if (usedRoutesDict.ContainsKey(previousCityID))
+                source = target;    // set as current      
+                previousCity = _cities[source];
+                if (leftRoutes[source].Count == 0)
+                {
+                    if (stack.Count != 0)
                     {
-                        usedRoutesDict[previousCityID].RemoveAt(nextRoute);
-                        favoriteRoutes[previousCity].Add(nextRoute);
+                        target = stack.Pop();
+                        if ((target == _basePoint || target == endingCity) && visitedEdges.Count == _countsOfEdges)
+                            break; 
+                        if (target == source)
+                            target = stack.Pop();
+                        tempPath.Add((source, previousCity.Connections[target]));  //add to circuit
+                        stack.Push(target);  //add target agai
+                        endingCity = target;
+                        continue;
                     }
                     else
+                        break;
+
+                }
+                else  //else random new target 
+                {
+
+                    randRoute = (ushort)r.Next(leftRoutes[source].Count());
+                    target = leftRoutes[source][randRoute];
+                    if(_doubled && leftRoutes[source].Count(x => x == target) == 1)   //prefered routes that have more than 1 connection
                     {
-                        usedRoutesDict[previousCityID] = new List<ushort>((IEnumerable<ushort>)Enumerable.Range(0, (int)routsCount).Where(x => x != nextRoute)); //Generate list with possible connections excluding next route
-                        favoriteRoutes[previousCity] = new HashSet<ushort>() { nextRoute }; //Add nextRoute as most prefered for baseCity for this chromosome
+                        randRoute = (ushort)r.Next(leftRoutes[source].Count());
+                        target = leftRoutes[source][randRoute];
                     }
-                //}
+
+                    if (prefered != null && prefered.ContainsKey(previousCity))
+                    {
+                        int indexer = prefered[previousCity].Count;
+                        while(prefered[previousCity].Count > 0)
+                        {
+                            try
+                            {
+                                tempTarget = prefered[previousCity].FirstOrDefault();
+                                if (leftRoutes[source].Contains(tempTarget))
+                                {
+                                    target = tempTarget;
+                                    prefered[previousCity].Remove(tempTarget);
+                                    break;
+                                }
+                                prefered[previousCity].Remove(tempTarget);
+
+                            }
+                            catch
+                            {
+                                target = leftRoutes[source][randRoute];
+                                break;
+                            }
+                        }
+                    }
+                }
+
+
+
+                visitedEdges[(Math.Min(source,target),Math.Max(source,target))] = true;
+                stack.Push(target);         //Add target to stack
+                                            //remove from possible routes 
+                leftRoutes[source].Remove(target);
+                leftRoutes[target].Remove(source);
+
+                if (FavoriteRoutes.ContainsKey(previousCity))
+                    FavoriteRoutes[previousCity].Add(target);
+                else
+                    FavoriteRoutes[previousCity] = new List<ushort>() { target };
+
+
+                if ((target == _basePoint || target == endingCity) && visitedEdges.Count == _countsOfEdges)
+                    break;
 
             }
+
+            ushort nextCity = tempPath.Count > 0 ? tempPath.Last().city : stack.Pop();  //Fill path
+            while (stack.Count > 0)
+                tempPath.Add((nextCity, _cities[nextCity].Connections[nextCity = stack.Pop()]));
+            tempPath.Add((nextCity, 0)); //last city doesn't have more connecitons, so cost is 0;
+
+            prefered = null;
+            visitedEdges = null;
+            leftRoutes = null;
+            stack = null;
+
             return tempPath;
         }
 
-        protected Chromosome(ChromosomeBase source)
+        protected Chromosome(IChromosome source)
         {
+            if(source is Chromosome ch)
+            {
+                FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(ch.FavoriteRoutes);
+                Path = new List<(ushort city, ushort cost)>(ch.Path);
+            }
+            else
+                Path = GeneratePath();
 
         }
 
+        private Chromosome()
+        {
+            FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>();
+            Path = GeneratePath();
+
+        }
         public override void Crossover(IChromosome pair)
         {
+            if (pair is Chromosome ch)
+            {
+                int part1Legnth = (int)Math.Floor(FavoriteRoutes.Count /3.0); //Take 40% of old preferences
+                int part2Legnth = FavoriteRoutes.Count - part1Legnth;
 
+                //cross genes 
+                var preferedRoutesChild1 = ch.FavoriteRoutes
+                                               .Take(part1Legnth)
+                                               .Concat(this.FavoriteRoutes)//.Take(part1Legnth))
+                                               .GroupBy(d => d.Key)
+                                               .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count>x.First().Value.Count? x.First().Value:x.Last().Value).ToList<ushort>()));
+                                               //.ToDictionary(x => x.Key, x => x.First().Value);
+                var preferedRoutesChild2 = this.FavoriteRoutes
+                                               .Take(part1Legnth)
+                                               .Concat(ch.FavoriteRoutes)//.Take(part1Legnth))
+                                               .GroupBy(d => d.Key)
+                                               .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count > x.First().Value.Count ? x.First().Value : x.Last().Value).ToList<ushort>()));
+                                                //.ToDictionary(x => x.Key, x => x.First().Value);
+
+
+                // replace parents wit children
+                this.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild1);
+                ch.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild2);
+                this.Path = GeneratePath(this.FavoriteRoutes);
+                ch.Path = GeneratePath(ch.FavoriteRoutes);
+            }
         }
-
         public override void Mutate()
         {
-
+            int i = r.Next((int)FavoriteRoutes.Count);
+            for(; i>0;i--)
+            {
+                List<ushort> _tmp;
+                var rnd = r.Next(this.FavoriteRoutes.Count);
+                var c = (City)rnd;
+                bool fff = this.FavoriteRoutes.ContainsKey(c);
+                this.FavoriteRoutes.TryRemove(c, out _tmp);
+            }
         }
 
         public override IChromosome Clone()
@@ -97,7 +217,9 @@ namespace AlgorytmGenetyczny.GeneticThings
 
         public override IChromosome CreateNew()
         {
-
+            var Chr = new Chromosome();
+           
+            return Chr;
         }
 
         public override void Generate()

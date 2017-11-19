@@ -18,30 +18,35 @@ namespace AlgorytmGenetyczny.GeneticThings
         {
             this._map = map;
             if (doubled)
-                _count = map.Count * 2;
+                _count = map.Count * 4;
             else
-                _count = map.Count;
+                _count = map.Count * 2;
         }
 
         public double Evaluate(IChromosome chromosome)
         {
-            return 1.0 / GetLength(chromosome);
+            return  (_count / (GetLength(chromosome)));
         }
 
 
-        public int GetLength(IChromosome chromosome)
+        public double GetLength(IChromosome chromosome)
         {
-            if (chromosome is PermutationChromosome chr)
+            //if (chromosome is PermutationChromosome chr)
+            //{
+            //    ushort[] path = ((PermutationChromosome)chromosome).Value;
+            //    var length = 0;
+            //    ushort i = (ushort)path.Length;
+            //    for (ushort j = 0; j < i - 1; j++)
+            //    {
+            //        length += path[j] > path[j + 1] ? _map[(j, (ushort)(j + 1))][0] : _map[(j, (ushort)(j + 1))][1];
+            //    }
+            //    if (i > _count)
+            //        return length;
+            //}
+            if (chromosome is Chromosome chr)
             {
-                ushort[] path = ((PermutationChromosome)chromosome).Value;
-                var length = 0;
-                ushort i = (ushort)path.Length;
-                for (ushort j = 0; j < i - 1; j++)
-                {
-                    length += path[j] > path[j + 1] ? _map[(j, (ushort)(j + 1))][0] : _map[(j, (ushort)(j + 1))][1];
-                }
-                if (i > _count)
-                    return length;
+               var length = chr.Path.Sum(x => x.cost);
+                return length;
             }
 
             return int.MaxValue;

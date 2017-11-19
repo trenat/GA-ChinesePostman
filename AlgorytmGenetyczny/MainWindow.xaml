@@ -12,7 +12,7 @@
     <Controls:MetroWindow.TitleTemplate>
         <ItemContainerTemplate>
             <WrapPanel Margin="4,4,0,0">
-                <iconPack:PackIconModern Width="24" Height="24" Kind="ManSuitcaseRun" Foreground="{StaticResource GrayBrush5}"/>
+                <iconPack:PackIconModern Width="24" Height="24" Kind="People" Foreground="{StaticResource GrayBrush5}"/>
                 <TextBlock Margin="4,0,0,0" FontSize="16" Text="My app"/>
             </WrapPanel>
         </ItemContainerTemplate>
@@ -117,9 +117,9 @@
                 </Border>
 
             </Expander>
-            <Button Content="Zapisz trasę" Width="100" VerticalAlignment="Top" Margin="0,0,360,0" HorizontalAlignment="Right"/>
-            <Button Content="Zapisz Wyniki" Width="100" VerticalAlignment="Top" Margin="0,0,250,0" HorizontalAlignment="Right"/>
-            <Button Content="Wczytaj z pliku" Width="120" VerticalAlignment="Top" Margin="0,0,120,0" HorizontalAlignment="Right"/>
+            <Button IsEnabled="False" Content="Zapisz trasę" Width="100" VerticalAlignment="Top" Margin="0,0,360,0" HorizontalAlignment="Right"/>
+            <Button IsEnabled="False" Content="Zapisz Wyniki" Width="100" VerticalAlignment="Top" Margin="0,0,250,0" HorizontalAlignment="Right"/>
+            <Button IsEnabled="False" Content="Wczytaj z pliku" Width="120" VerticalAlignment="Top" Margin="0,0,120,0" HorizontalAlignment="Right"/>
             <Grid Width="20" Background="{StaticResource WhiteBrush}" Height="27.5" VerticalAlignment="Top" Margin="0,0,100,0" HorizontalAlignment="Right"/>
         </Grid>
 
@@ -266,7 +266,7 @@
                                 </WrapPanel>
                                 <WrapPanel>
                                     <TextBlock  Text="Izolowane wyspy?"/>
-                                    <CheckBox Width="50" x:Name="Islands" Padding="4,6,0,0" IsChecked="{Binding Migration}">
+                                    <CheckBox Width="50" IsEnabled="False"  x:Name="Islands" Padding="4,6,0,0" IsChecked="{Binding Migration}">
                                         <CheckBox.Style>
                                             <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type  CheckBox}}">
                                                 <Setter Property="Content" Value="Tak"/>

@@ -29,14 +29,14 @@ namespace AlgorytmGenetyczny
             ["Ruletka"] = roulette
         };
 
-        public int CitiesCount { set; get; } = 50;
-        public int ConnectionsCount { set; get; } = 50;
+        public int CitiesCount { set; get; } = 5;
+        public int ConnectionsCount { set; get; } = 6;
         public int MaxCost { set; get; } = 10;
         public int MinCost { set; get; } = 1;
         public int MaxCostDifferent { set; get; } = 3;
 
         public int PopulationCount { set; get; } = 100;
-        public int GenerationCount { set; get; } = 100;
+        public int GenerationCount { set; get; } = 10;
         public Dictionary<string, ISelectionMethod> SelectionMethods
         {
             get
@@ -69,28 +69,168 @@ namespace AlgorytmGenetyczny
         {
             //TODO:: Check if RoutsCount is not less then CitiesCount 
 
+            Cities = CreateCities((ushort)CitiesCount);
             ConnectCities();
             int leftConnections = ConnectionsCount - (CitiesCount - 1);
             GenerateRandomConnections(leftConnections);
             MakeMap();
         }
 
+        class SelectAll : ISelectionMethod
+        {
+            public void ApplySelection(List<IChromosome> chromosomes, int size)
+            {
+                ;
+            }
+        }
+
 
         private void SearchRoute(object sender, RoutedEventArgs e)
         {
+            
             Fitness fitnessFunc = new Fitness(map, false);
             Population population = new Population(PopulationCount,
-                                                   new Chromosome(ConnectionsCount, Cities, r),
+                                                   new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
                                                    fitnessFunc,
                                                   (ISelectionMethod)SelectedType.Value);
+            //Population population2 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population3 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population4 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population5 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population6 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population7 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population8 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population9 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
+            //Population population10 = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
             population.CrossoverRate = CrossoverRate;
             population.MutationRate = MutationRate;
+            population.RandomSelectionPortion = .7;
+            population.AutoShuffling = false;
+            //population2.CrossoverRate = CrossoverRate;
+            //population2.MutationRate = MutationRate;
+            //population2.RandomSelectionPortion = .7;
+            //population2.AutoShuffling = false;
+            //population3.CrossoverRate = CrossoverRate;
+            //population3.MutationRate = MutationRate;
+            //population3.RandomSelectionPortion = .7;
+            //population3.AutoShuffling = false;
+            //population4.CrossoverRate = CrossoverRate;
+            //population4.MutationRate = MutationRate;
+            //population4.RandomSelectionPortion = .6;
+            //population4.AutoShuffling = true;
+            //population5.CrossoverRate = CrossoverRate;
+            //population5.MutationRate = MutationRate;
+            //population5.RandomSelectionPortion = .6;
+            //population5.AutoShuffling = true;
+            //population6.CrossoverRate = CrossoverRate;
+            //population6.MutationRate = MutationRate;
+            //population6.RandomSelectionPortion = .6;
+            //population6.AutoShuffling = true;
+            //population7.CrossoverRate = CrossoverRate;
+            //population7.MutationRate = MutationRate;
+            //population7.RandomSelectionPortion = .6;
+            //population7.AutoShuffling = true;
+            //population8.CrossoverRate = CrossoverRate;
+            //population8.MutationRate = MutationRate;
+            //population8.RandomSelectionPortion = .6;
+            //population8.AutoShuffling = true;
+            //population9.CrossoverRate = CrossoverRate;
+            //population9.MutationRate = MutationRate;
+            //population9.RandomSelectionPortion = .6;
+            //population9.AutoShuffling = true;
+            //population10.CrossoverRate = CrossoverRate;
+            //population10.MutationRate = MutationRate;
+            //population10.RandomSelectionPortion = .6;
+            //population10.AutoShuffling = true;
+            //Population container = new Population(PopulationCount,
+            //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+            //                                       fitnessFunc,
+            //                                      (ISelectionMethod)SelectedType.Value);
             int i = 0;
             bool needToStop = false;
+
+
+            System.Diagnostics.Debug.WriteLine("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNew run:\n");
             while (!needToStop)
             {
+                //var tasks = new Task[] { Task.Run(() => {
+                //    System.Diagnostics.Debug.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++"); population.RunEpoch();
+                //                                                                            }),
+                //                         Task.Run(() => population2.RunEpoch()),
+                //                         Task.Run(() => population3.RunEpoch()),
+                //                         Task.Run(() => population4.RunEpoch()),
+                //                         Task.Run(() => population5.RunEpoch()),
+                //                         Task.Run(() => population6.RunEpoch()),
+                //                         Task.Run(() => population7.RunEpoch()),
+                //                         Task.Run(() => population8.RunEpoch()),
+                //                         Task.Run(() => population9.RunEpoch()),
+                //                         Task.Run(() => population10.RunEpoch())
+                //                                                                };
+                //Task.WaitAll(tasks);
 
+                //if (i > 1 && i % 20 == 0)
+                //{
+                //    try
+                //    {
+                //        population.Migrate(population2, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)elite);
+                //        population2.Migrate(population3, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)elite);
+                //        population3.Migrate(population4, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)elite);
+                //        population4.Migrate(population5, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        population5.Migrate(population6, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        population6.Migrate(population7, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        population7.Migrate(population8, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        population8.Migrate(population9, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        population9.Migrate(population10, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        population10.Migrate(population, (int)Math.Floor(PopulationCount / 20.0), (ISelectionMethod)SelectedType.Value);
+                //        System.Diagnostics.Debug.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++");
+                //        System.Diagnostics.Debug.WriteLine("MIGRATION");
+                //        System.Diagnostics.Debug.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++");
+                //    }
+                //    catch
+                //    {
+
+                //        System.Diagnostics.Debug.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++");
+                //        System.Diagnostics.Debug.WriteLine("MIGRATION Failed");
+                //        System.Diagnostics.Debug.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++");
+                //    }
+
+                //}
                 population.RunEpoch();
+                //population2.RunEpoch();
+                //population3.RunEpoch();
+
+
+                System.Diagnostics.Debug.WriteLine("Best path: " + String.Join(",", (population.BestChromosome as Chromosome).Path) + $"\nBest fit: {population.BestChromosome.Fitness}");
+                System.Diagnostics.Debug.WriteLine("Avarge fit: " + population.FitnessAvg);
+                System.Diagnostics.Debug.WriteLine("Best length: " + fitnessFunc.GetLength(population.BestChromosome));
+                System.Diagnostics.Debug.WriteLine("Cities visited: " + (population.BestChromosome as Chromosome).Path.Count());
                 // display current path
                 //             ushort[] bestValue = ((ShortArrayChromosome)population.BestChromosome).Value;
                 if (i > GenerationCount)
@@ -100,67 +240,91 @@ namespace AlgorytmGenetyczny
             //population.Migrate()
         }
 
-        private void RandCost(out int source, out int target)
+        private void RandCost(out ushort source, out ushort target)
         {
-            source = r.Next(MinCost, MaxCost + 1);
-            target = r.Next(-MaxCostDifferent, MaxCostDifferent + 1) + source;
-            target = Max(target, MinCost);
-            target = Min(target, MaxCost);
+            source = (ushort)r.Next(MinCost, MaxCost + 1);
+            target = (ushort)(r.Next(-MaxCostDifferent, MaxCostDifferent + 1) + source);
+            target = (ushort)Max(target, MinCost);
+            target = (ushort)Min(target, MaxCost);
 
         }
+
+        private Dictionary<ushort, City> CreateCities(ushort count)
+        {
+            var citiesDictionary = new Dictionary<ushort, City>();
+            for (ushort i = 0; i < count; i++)
+                citiesDictionary.Add(i, new City() { Name = i });
+            return citiesDictionary;
+        }
+
         private void ConnectCities()
         {
-            int costToSource;
-            int costToTarget;
-            Cities = new Dictionary<int, City>();
-            City city1 = null;
-            City city2 = null;
-
-            for (int cityN = 0; cityN < CitiesCount - 1; cityN++)  // Connect all cieties
+            ushort costToSource;
+            ushort costToTarget;
+            City sourceCity = null;
+            City targetCity = null;
+            for (ushort cityN = 0; cityN < CitiesCount-1; cityN++)  // Connect all cieties
             {
                 RandCost(out costToSource, out costToTarget);
-                if (cityN != 0)
-                {
-                    city2 = new City() { Name = cityN + 1 };
-                    Cities.Add(cityN + 1, city2);
-                    Cities[cityN].CreateRoute(city2, costToSource, costToTarget);
-                }
-                else
-                {
-                    city1 = new City() { Name = cityN };
-                    city2 = new City() { Name = cityN + 1 };
-                    Cities.Add(cityN, city1);
-                    Cities.Add(cityN + 1, city2);
-                    city1.CreateRoute(city2, costToSource, costToTarget);
-                }
+
+                sourceCity = Cities[cityN];
+                targetCity = Cities[(ushort)(cityN + 1)];
+                sourceCity.CreateRoute(targetCity, costToSource, costToTarget);
+                
+                //if (cityN != 0)
+                //{
+                //    city2 = new City() { Name = ((ushort)(cityN + 1)) };
+                //    Cities.Add(cityN, city2);
+                //    Cities[cityN].CreateRoute(city2, costToSource, costToTarget);
+                //}
+                //else
+                //{
+                //    city1 = new City() { Name = cityN };
+                //    city2 = new City() { Name = ((ushort)(cityN + 1)) };
+                //    Cities.Add(cityN, city1);
+                //}
+                //RandCost(out costToSource, out costToTarget);
+                //if (cityN != 0)
+                //{
+                //    city2 = new City() { Name = ((ushort)(cityN + 1)) };
+                //}
+                //else
+                //{
+                //    city1 = new City() { Name = cityN };
+                //    city2 = new City() { Name = ((ushort)(cityN + 1)) };
+                //    Cities.Add(cityN, city1);
+                //}
+
+                //Cities.Add(((ushort)(cityN + 1)), city2);
+                //city1.CreateRoute(city2, costToSource, costToTarget);
             }
         }
         private void GenerateRandomConnections(int leftConnections)
         {
-            int _source;
-            int _target;
-            int _tempTarget;
-            int _tempSource;
+            ushort _source;
+            ushort _target;
+            ushort _tempTarget;
+            ushort _tempSource;
 
-            int costToSource;
-            int costToTarget;
+            ushort costToSource;
+            ushort costToTarget;
             for (int i = 0; i < leftConnections; i++)   // make 'leftConnections' number of connection
             {
-                _source = r.Next(CitiesCount);   // rand source 
+                _source = (ushort) r.Next(CitiesCount);   // rand source 
                 while (true)
                 {
-                    _target = r.Next(CitiesCount);  //rand target, and check if is != that source
+                    _target =(ushort) r.Next(CitiesCount);  //rand target, and check if is != that source
                     if (_target != _source)
                         break;
                 }
 
                 _tempTarget = _target;
                 _tempSource = _source;
-                RandCost(out costToSource, out costToTarget);  //ran cost from and to target
 
                 while (true)
                 {
-                    if (_target != _source && Cities[_source].CreateRoute(Cities[_target], 10, 10))   //check if still target!= source, then if source doesn't already have connection to target
+                    RandCost(out costToSource, out costToTarget);  //ran cost from and to target
+                    if (_target != _source && Cities[_source].CreateRoute(Cities[_target], costToSource, costToTarget))   //check if still target!= source, then if source doesn't already have connection to target
                     {
                         break;
                     }
@@ -194,9 +358,10 @@ namespace AlgorytmGenetyczny
                         continue;
                     else  // else Add date about connection ( Source, Target, CostToSource, CostToTarget) to map (used in GA) and to 'data' (used on GUI)
                     {
-                        Data.Add(new GraphStruct(city.Key, connection.Key, connection.Value, Cities[connection.Key].Connections[city.Key]));
-                        map[(city.Key, connection.Key)] = new ushort[]{ connection.Value,
-                                                                        Cities[connection.Key].Connections[city.Key] };
+                        Data.Add(new GraphStruct(city.Key, connection.Key,
+                                                          Cities[connection.Key].Connections[city.Key], connection.Value));
+                        map[(city.Key, connection.Key)] = new ushort[]{
+                                                          Cities[connection.Key].Connections[city.Key], connection.Value, };
                                                                                           
                 }
             }
