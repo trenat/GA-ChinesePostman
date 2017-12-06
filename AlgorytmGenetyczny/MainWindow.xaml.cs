@@ -10,6 +10,8 @@ using Accord;
 using Accord.Genetic;
 using static System.Math;
 using AlgorytmGenetyczny.GeneticThings;
+using Microsoft.Win32;
+using System.IO;
 
 namespace AlgorytmGenetyczny
 {
@@ -56,7 +58,7 @@ namespace AlgorytmGenetyczny
         public Dictionary<ushort, City> Cities { set; get; }
         public ObservableCollection<GraphStruct> Data { set; get; } = new ObservableCollection<GraphStruct>();
         public Dictionary<(ushort, ushort), ushort[]> map = null;  //source,target - costS, costT, count 
-        public Object three; //w sumie miasta są już zmapowane, drzewo to Cities<> 
+        private bool _isEulerPath;
 
         public MainWindow()
         {
@@ -88,7 +90,7 @@ namespace AlgorytmGenetyczny
         private void SearchRoute(object sender, RoutedEventArgs e)
         {
             
-            Fitness fitnessFunc = new Fitness(map, false);
+            Fitness fitnessFunc = new Fitness(map.Count, false);
             Population population = new Population(PopulationCount,
                                                    new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
                                                    fitnessFunc,
@@ -344,7 +346,29 @@ namespace AlgorytmGenetyczny
                     }
                 }
             }
+            if(!IsConnected())
+                throw new Exception("Błąd przy dodawaniu tras, prawdopodobnie zbyt dużo połączeń");
+            _isEulerPath = Cities.All(x => x.Value.Connections.Count % 2 == 0);
+           
         }
+
+        HashSet<City> ConnectedCities = new HashSet<City>();
+
+        private bool IsConnected(City c)
+        {
+            ConnectedCities.Add(c);
+            return c.Connections.All(x => ConnectedCities.Contains(Cities[x.Key]) || IsConnected(Cities[x.Key]));
+               
+
+        }
+
+        private bool IsConnected()
+        {
+            var lastCity = Cities.First().Value;
+            IsConnected(lastCity);
+            return ConnectedCities.Count == CitiesCount;
+        }
+
         private void MakeMap()
         {
             Data.Clear();
@@ -366,7 +390,67 @@ namespace AlgorytmGenetyczny
                 }
             }
         }
-    }
 
-}
+            CitiesCount = Cities.Count;
+            ConnectionsCount = map.Count;
+        }
+
+        private void SaveRoute(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.FileName = "Graph";
+            dialog.DefaultExt = ".txt";
+            dialog.Filter = "Text |*.txt"; 
+            if (dialog.ShowDialog() == true)
+            {
+                var stringB = new StringBuilder();
+                foreach(var data in Data)
+                {
+                    stringB.AppendLine(data.Source + "|"
+                                  + data.Target + "|"
+                                  + data.CostToSource + "|"
+                                  + data.CostToTarget);
+                }
+                File.WriteAllText(dialog.FileName, stringB.ToString());
+            }
+
+        }
+
+        private void LoadRoute(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.DefaultExt = ".txt";
+            dialog.Filter = "Text |*.txt";
+            if (dialog.ShowDialog() == true)
+            {
+                Cities.Clear();
+                
+                var dataLines = File.ReadAllLines(dialog.FileName);
+                ushort source, target, costToSource, costToTarget;
+
+                foreach (var data in dataLines)
+                {
+                   var graphData = data.Trim().Split('|').Select(x => x.Replace("|","")).ToArray();
+                   if(ushort.TryParse(graphData[0], out source)
+                    && ushort.TryParse(graphData[1], out target)
+                    && ushort.TryParse(graphData[2], out costToSource)
+                    && ushort.TryParse(graphData[3], out costToTarget))
+                    {
+                        if (target == source)
+                            throw new Exception("błędne dane wejściowe: miasto docelowe i źrodłowe są takie same");
+                        
+                        if (!Cities.ContainsKey(source))
+                            Cities[source] = new City() { Name = source };
+                        if (!Cities.ContainsKey(target))
+                            Cities[target] = new City() { Name = target };
+
+                        Cities[source].CreateRoute(Cities[target], costToSource, costToTarget);
+                    }
+
+                }
+
+                CitiesCount = Cities.Count;
+            }
+        }
+    }
 }

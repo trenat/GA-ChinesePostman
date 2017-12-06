@@ -117,9 +117,20 @@
                 </Border>
 
             </Expander>
-            <Button IsEnabled="False" Content="Zapisz trasę" Width="100" VerticalAlignment="Top" Margin="0,0,360,0" HorizontalAlignment="Right"/>
+            <Button Content="Zapisz trasę" Width="100" Click="SaveRoute" VerticalAlignment="Top" Margin="0,0,360,0" HorizontalAlignment="Right">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Data.Count}" Value="0">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button IsEnabled="False" Content="Zapisz Wyniki" Width="100" VerticalAlignment="Top" Margin="0,0,250,0" HorizontalAlignment="Right"/>
-            <Button IsEnabled="False" Content="Wczytaj z pliku" Width="120" VerticalAlignment="Top" Margin="0,0,120,0" HorizontalAlignment="Right"/>
+            <Button Click="LoadRoute" Content="Wczytaj z pliku" Width="120" VerticalAlignment="Top" Margin="0,0,120,0" HorizontalAlignment="Right"/>
             <Grid Width="20" Background="{StaticResource WhiteBrush}" Height="27.5" VerticalAlignment="Top" Margin="0,0,100,0" HorizontalAlignment="Right"/>
         </Grid>
 
