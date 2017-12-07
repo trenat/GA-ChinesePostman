@@ -8,7 +8,7 @@
         xmlns:iconPack="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:classes="clr-namespace:AlgorytmGenetyczny.Classes"
         Height="600"
-        Width="800">
+        Width="1000">
     <Controls:MetroWindow.TitleTemplate>
         <ItemContainerTemplate>
             <WrapPanel Margin="4,4,0,0">
@@ -158,6 +158,16 @@
                     </DataGrid>
                 </Grid>
             </Border>
+            <Grid Grid.Column="1">
+                <ListBox ItemsSource="{Binding Queue}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Label Content="{Binding Name}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    
+                </ListBox>
+            </Grid>
             <Border BorderBrush="{StaticResource AccentColorBrush3}" Grid.Column="2" BorderThickness="1">
                 <Grid Margin="16">
                     <Grid.Resources>
@@ -277,7 +287,7 @@
                                 </WrapPanel>
                                 <WrapPanel>
                                     <TextBlock  Text="Izolowane wyspy?"/>
-                                    <CheckBox Width="50" IsEnabled="False"  x:Name="Islands" Padding="4,6,0,0" IsChecked="{Binding Migration}">
+                                    <CheckBox Width="50" IsEnabled="True"  x:Name="Islands" Padding="4,6,0,0" IsChecked="{Binding Migration}">
                                         <CheckBox.Style>
                                             <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type  CheckBox}}">
                                                 <Setter Property="Content" Value="Tak"/>
@@ -313,9 +323,10 @@
                                         <TextBlock Text="Co ile pokoleń:"/>
                                         <TextBox Text="{Binding MigrationTime}" />
                                     </WrapPanel>
-                                </StackPanel>                              
+                                </StackPanel>
                             </StackPanel>
-                            <Button Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" Content="Start" Click="SearchRoute"/>
+                            <Button Grid.Row="2" Grid.Column="1" Margin="0,45,0,0" Height="30" Content="Start" Click="SearchRoute"/>
+                            <Button Grid.Row="2" Grid.Column="1" Margin="0,-25,0,0" Height="30" Content="Dodaj do kolejki" Click="AddToQue"/>
 
                         </Grid>
                     </Border>

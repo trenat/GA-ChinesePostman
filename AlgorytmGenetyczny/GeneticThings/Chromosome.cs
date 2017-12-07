@@ -175,14 +175,19 @@ namespace AlgorytmGenetyczny.GeneticThings
                 int part1Legnth = (int)Math.Floor(FavoriteRoutes.Count /3.0); //Take 40% of old preferences
                 int part2Legnth = FavoriteRoutes.Count - part1Legnth;
 
+
+
+                
                 //cross genes 
                 var preferedRoutesChild1 = ch.FavoriteRoutes
+                                               .OrderBy(x => x.Key.Name)
                                                .Take(part1Legnth)
                                                .Concat(this.FavoriteRoutes)//.Take(part1Legnth))
                                                .GroupBy(d => d.Key)
                                                .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count>x.First().Value.Count? x.First().Value:x.Last().Value).ToList<ushort>()));
                                                //.ToDictionary(x => x.Key, x => x.First().Value);
                 var preferedRoutesChild2 = this.FavoriteRoutes
+                                               .OrderBy(x => x.Key.Name)
                                                .Take(part1Legnth)
                                                .Concat(ch.FavoriteRoutes)//.Take(part1Legnth))
                                                .GroupBy(d => d.Key)

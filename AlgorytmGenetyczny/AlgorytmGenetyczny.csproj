@@ -95,6 +95,8 @@
     <Compile Include="Classes\City.cs" />
     <Compile Include="Classes\GraphStruct.cs" />
     <Compile Include="Classes\Pair.cs" />
+    <Compile Include="Classes\QueueData.cs" />
+    <Compile Include="Classes\Result.cs" />
     <Compile Include="GeneticThings\Chromosome.cs" />
     <Compile Include="GeneticThings\Fitness.cs" />
     <Compile Include="MainWindow.xaml.cs">
