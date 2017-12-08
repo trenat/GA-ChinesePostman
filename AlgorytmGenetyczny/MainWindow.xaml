@@ -162,7 +162,75 @@
                 <ListBox ItemsSource="{Binding Queue}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Label Content="{Binding Name}"/>
+                            <Grid >
+                                <ToggleButton x:Name="Info" Panel.ZIndex="1" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                            <Canvas Width="24" Height="24" Background="#01000000">
+                                                <iconPack:PackIconModern Width="24" x:Name="icon" Height="24" Kind="InformationCircle" Foreground="{StaticResource GrayBrush5}"/>
+                                            </Canvas>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="icon" Property="Foreground" Value="Green"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+                                <StackPanel>
+                                    <StackPanel.Resources>
+                                        <Style TargetType="StackPanel" x:Key="Toggle">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=Info, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                        <Style TargetType="Label" x:Key="Title">
+                                            <Setter Property="Width" Value="120"/>
+                                        </Style>
+                                    </StackPanel.Resources>
+                                    <Label Content="{Binding Name}"/>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="PopulationCount:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding PopulationCount}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="GenerationCount:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding GenerationCount}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="SelectionMethod:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding SelectionMethod}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="CrossOver:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding CrossOver}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="Mutation:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding Mutation}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="Migration:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding Migration}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="IslandsCount:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding IslandsCount}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="MigrationCount:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding MigrationCount}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Style="{StaticResource Toggle}">
+                                        <Label Content="MigrationTime:" Style="{StaticResource Title}"/>
+                                        <Label Content="{Binding MigrationTime}"/>
+                                    </StackPanel>
+
+                                </StackPanel>
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     
