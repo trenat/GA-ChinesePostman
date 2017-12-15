@@ -346,6 +346,21 @@
                                     <ComboBox SelectedValue="Value" DisplayMemberPath="Key" SelectedItem="{Binding SelectedType}"  ItemsSource="{Binding SelectionMethods}"  />
                                 </WrapPanel>
                                 <WrapPanel>
+                                    <TextBlock  Text="Losowe krzyżowanie?"/>
+                                    <CheckBox Width="50" IsEnabled="True"  x:Name="CrossvverMix" Padding="4,6,0,0" IsChecked="{Binding CrossoverMix}">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type  CheckBox}}">
+                                                <Setter Property="Content" Value="Tak"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsChecked" Value="False">
+                                                        <Setter Property="Content" Value="Nie"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
+                                </WrapPanel>
+                                <WrapPanel>
                                     <TextBlock Text="Współczynnik krzyżowania:"/>
                                     <TextBox Controls:TextBoxHelper.IsSpellCheckContextMenuEnabled="True" Text="{Binding CrossoverRate}" />
                                 </WrapPanel>
@@ -394,7 +409,11 @@
                                 </StackPanel>
                             </StackPanel>
                             <Button Grid.Row="2" Grid.Column="1" Margin="0,45,0,0" Height="30" Content="Start" Click="SearchRoute"/>
-                            <Button Grid.Row="2" Grid.Column="1" Margin="0,-25,0,0" Height="30" Content="Dodaj do kolejki" Click="AddToQue"/>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,10,0,35" Height="30" Orientation="Horizontal">
+                                <Button  Content="Dodaj do kolejki" Click="AddToQue" Height="30" Width="214"/>
+                                <TextBlock Margin="5,0,0,0" Padding="0,10,0,0" Text="*"/>
+                                <TextBox Margin="5,0,0,0" Padding="0,4,0,0" Text="{Binding QueueCount}"/>
+                            </StackPanel> 
 
                         </Grid>
                     </Border>

@@ -16,16 +16,18 @@ namespace AlgorytmGenetyczny.GeneticThings
         private static ushort _basePoint;
         private static bool _doubled;
         private static ushort _countsOfEdges;
+        private static bool _crossoverMix;
 
         public List<(ushort city, ushort cost)> Path { get; set; }
         private ConcurrentDictionary<City, List<ushort>> FavoriteRoutes { set; get; }  //Chromosome, for each city have it's route ranking, 
-        public Chromosome(Dictionary<ushort, City> cities, Random rnd, ushort basePoint, bool doubled, ushort countsOfEdges)
+        public Chromosome(Dictionary<ushort, City> cities, Random rnd, ushort basePoint, bool doubled, ushort countsOfEdges, bool crossoverMix)
         {
             _cities = cities;
             _basePoint = basePoint;
             r = rnd;
             _doubled = doubled;
             _countsOfEdges = countsOfEdges;
+            _crossoverMix = crossoverMix;
             FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>();
             Path = GeneratePath();
 
@@ -86,10 +88,16 @@ namespace AlgorytmGenetyczny.GeneticThings
 
                     randRoute = (ushort)r.Next(leftRoutes[source].Count());
                     target = leftRoutes[source][randRoute];
-                    if(_doubled && leftRoutes[source].Count(x => x == target) == 1)   //prefered routes that have more than 1 connection
+                    for(int i = 0; i< 5; i++)
                     {
-                        randRoute = (ushort)r.Next(leftRoutes[source].Count());
-                        target = leftRoutes[source][randRoute];
+                        if (_doubled && leftRoutes[source].Count(x => x == target) == 1)   //prefered routes that have more than 1 connection
+                        {
+                            randRoute = (ushort)r.Next(leftRoutes[source].Count());
+                            target = leftRoutes[source][randRoute];
+                        }
+                        else
+                            break;
+
                     }
 
                     if (prefered != null && prefered.ContainsKey(previousCity))
@@ -180,14 +188,14 @@ namespace AlgorytmGenetyczny.GeneticThings
                 
                 //cross genes 
                 var preferedRoutesChild1 = ch.FavoriteRoutes
-                                               .OrderBy(x => x.Key.Name)
+                                               .OrderBy(x => _crossoverMix? 0 : x.Key.Name )
                                                .Take(part1Legnth)
                                                .Concat(this.FavoriteRoutes)//.Take(part1Legnth))
                                                .GroupBy(d => d.Key)
                                                .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count>x.First().Value.Count? x.First().Value:x.Last().Value).ToList<ushort>()));
                                                //.ToDictionary(x => x.Key, x => x.First().Value);
                 var preferedRoutesChild2 = this.FavoriteRoutes
-                                               .OrderBy(x => x.Key.Name)
+                                               .OrderBy(x => _crossoverMix ? 0: x.Key.Name)
                                                .Take(part1Legnth)
                                                .Concat(ch.FavoriteRoutes)//.Take(part1Legnth))
                                                .GroupBy(d => d.Key)
@@ -196,6 +204,7 @@ namespace AlgorytmGenetyczny.GeneticThings
 
 
                 // replace parents wit children
+                if( kill parent )
                 this.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild1);
                 ch.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild2);
                 this.Path = GeneratePath(this.FavoriteRoutes);

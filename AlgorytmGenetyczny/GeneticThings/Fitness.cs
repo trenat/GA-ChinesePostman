@@ -23,7 +23,7 @@ namespace AlgorytmGenetyczny.GeneticThings
 
         public double Evaluate(IChromosome chromosome)
         {
-            return  (_count / (GetLength(chromosome)));
+            return  (_count*10 / (GetLength(chromosome)));
         }
 
 

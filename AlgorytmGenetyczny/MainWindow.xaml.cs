@@ -47,13 +47,18 @@ namespace AlgorytmGenetyczny
             }
         }
         public KeyValuePair<string, ISelectionMethod> SelectedType { set; get; }
+        public bool CrossoverMix { set; get; } = false;
         public double CrossoverRate { set; get; } = 0.75;
         public double MutationRate { set; get; } = 0.15;
+        public bool AutoShufling { set; get; } = true;
+        public double RandomSelectionPortion { set; get; } = 0.15;
 
         public bool Migration { set; get; } = false;
         public int IslandsCount { set; get; } = 10;
         public int MigrationCount { set; get; } = 10;
         public int MigrationTime { set; get; } = 10;
+
+        public int QueueCount { set; get; } = 5;
 
         public Dictionary<ushort, City> Cities { set; get; } = new Dictionary<ushort, City>();
         public ObservableCollection<GraphStruct> Data { set; get; } = new ObservableCollection<GraphStruct>();
@@ -70,12 +75,12 @@ namespace AlgorytmGenetyczny
                 while (Queue.Count != complited)
                 {
                     Fitness fitnessFunc = new Fitness(map.Count, false);
-                    Population population = new Population(PopulationCount,
-                                                           new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+                    Population population = new Population(Queue[complited].PopulationCount,
+                                                           new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, Queue[complited].CrossoverMix),
                                                            fitnessFunc,
-                                                          (ISelectionMethod)SelectedType.Value);
-                    population.CrossoverRate = CrossoverRate;
-                    population.MutationRate = MutationRate;
+                                                           Queue[complited].SelectionMethod);
+                    population.CrossoverRate = Queue[complited].CrossOver;
+                    population.MutationRate = Queue[complited].Mutation;
                     population.RandomSelectionPortion = .7;
                     population.AutoShuffling = false;
 
@@ -84,7 +89,6 @@ namespace AlgorytmGenetyczny
                     while (!needToStop)
                     {
                         population.RunEpoch();
-
                         Queue[complited].Results.Add(new Result((population.BestChromosome as Chromosome).Path,
                                                                 population.BestChromosome.Fitness,
                                                                 population.FitnessAvg,
@@ -96,10 +100,11 @@ namespace AlgorytmGenetyczny
                         System.Diagnostics.Debug.WriteLine("Best length: " + fitnessFunc.GetLength(population.BestChromosome));
                         System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count());
 
-                        if (i > GenerationCount)
+                        if (i > Queue[complited].GenerationCount)
                             break;
                         i++;
                     }
+                    Queue[complited].Name += ": " + (int)fitnessFunc.GetLength(population.BestChromosome);
                     complited++;
                 }
             };
@@ -129,8 +134,9 @@ namespace AlgorytmGenetyczny
         private Task runQue;
         private void AddToQue(object sender, RoutedEventArgs e)
         {
-            Queue.Add(new QueueData($"Evolution {count++}", new List<Result>(), PopulationCount, GenerationCount, SelectedType.Value,
-                        CrossoverRate, MutationRate, Migration, IslandsCount, MigrationCount, MigrationTime));
+            for(int i = 0; i< QueueCount; i++)
+                Queue.Add(new QueueData($"Evolution {count++}", new List<Result>(), PopulationCount, GenerationCount, SelectedType.Value,
+                            CrossoverMix, CrossoverRate, MutationRate, Migration, IslandsCount, MigrationCount, MigrationTime));
             if(runQue == null || runQue.IsCompleted)
             {
                 runQue = new Task(QueueTask);
@@ -145,7 +151,7 @@ namespace AlgorytmGenetyczny
 
             Fitness fitnessFunc = new Fitness(map.Count, false);
             Population population = new Population(PopulationCount,
-                                                   new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
+                                                   new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, CrossoverMix),
                                                    fitnessFunc,
                                                   (ISelectionMethod)SelectedType.Value);
 
@@ -188,8 +194,8 @@ namespace AlgorytmGenetyczny
             //                                      (ISelectionMethod)SelectedType.Value);
             population.CrossoverRate = CrossoverRate;
             population.MutationRate = MutationRate;
-            population.RandomSelectionPortion = .7;
-            population.AutoShuffling = false;
+            population.RandomSelectionPortion = .15;
+            population.AutoShuffling = true;
             //population2.CrossoverRate = CrossoverRate;
             //population2.MutationRate = MutationRate;
             //population2.RandomSelectionPortion = .7;
@@ -287,7 +293,7 @@ namespace AlgorytmGenetyczny
                 System.Diagnostics.Debug.WriteLine("Best path: " + String.Join(",", (population.BestChromosome as Chromosome).Path) + $"\nBest fit: {population.BestChromosome.Fitness}");
                 System.Diagnostics.Debug.WriteLine("Avarge fit: " + population.FitnessAvg);
                 System.Diagnostics.Debug.WriteLine("Best length: " + fitnessFunc.GetLength(population.BestChromosome));
-                System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count());
+                System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count() + $"Geneartion: {i}");
                 // display current path
                 //             ushort[] bestValue = ((ShortArrayChromosome)population.BestChromosome).Value;
                 if (i > GenerationCount)
