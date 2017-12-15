@@ -36,11 +36,13 @@ namespace AlgorytmGenetyczny.Classes
         public int IslandsCount { set; get; }
         public int MigrationCount { set; get; }
         public int MigrationTime { set; get; }
-
+        public double RandomSelectionPortion { get; internal set; }
+        public bool AutoShufling { get; internal set; }
+        public bool KillBothParents { get; internal set; }
 
         public QueueData(string Name, List<Result> Results, int PopulationCount, int GenerationCount, ISelectionMethod SelectionMethod,
-                                     bool CrossoverMix, double CrossOver, double Mutation, bool Migration,
-                                     int IslandsCount, int MigrationCount, int MigrationTime)
+                                     bool CrossoverMix, double CrossOver, bool KillBothParents, double Mutation, bool AutoShufling,
+                                     double RandomSelectionPortion, bool Migration, int IslandsCount, int MigrationCount, int MigrationTime)
         {
             this.Name = Name;
             this.Results = Results;
@@ -54,10 +56,14 @@ namespace AlgorytmGenetyczny.Classes
             this.IslandsCount = IslandsCount;
             this.MigrationCount = MigrationCount;
             this.MigrationTime = MigrationTime;
+            this.RandomSelectionPortion = RandomSelectionPortion;
+            this.AutoShufling = AutoShufling;
+            this.KillBothParents = KillBothParents;
+
         }
 
-        #region notify
-        protected void OnPropertyChanged([CallerMemberName]string propertyName = "")
+    #region notify
+    protected void OnPropertyChanged([CallerMemberName]string propertyName = "")
         {
             var changed = PropertyChanged;
             if (changed == null)

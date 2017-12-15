@@ -17,10 +17,11 @@ namespace AlgorytmGenetyczny.GeneticThings
         private static bool _doubled;
         private static ushort _countsOfEdges;
         private static bool _crossoverMix;
+        private static bool _killBothParents;
 
         public List<(ushort city, ushort cost)> Path { get; set; }
         private ConcurrentDictionary<City, List<ushort>> FavoriteRoutes { set; get; }  //Chromosome, for each city have it's route ranking, 
-        public Chromosome(Dictionary<ushort, City> cities, Random rnd, ushort basePoint, bool doubled, ushort countsOfEdges, bool crossoverMix)
+        public Chromosome(Dictionary<ushort, City> cities, Random rnd, ushort basePoint, bool doubled, ushort countsOfEdges, bool crossoverMix, bool killBothParents)
         {
             _cities = cities;
             _basePoint = basePoint;
@@ -28,6 +29,7 @@ namespace AlgorytmGenetyczny.GeneticThings
             _doubled = doubled;
             _countsOfEdges = countsOfEdges;
             _crossoverMix = crossoverMix;
+            _killBothParents = killBothParents;
             FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>();
             Path = GeneratePath();
 
@@ -180,35 +182,44 @@ namespace AlgorytmGenetyczny.GeneticThings
         {
             if (pair is Chromosome ch)
             {
-                int part1Legnth = (int)Math.Floor(FavoriteRoutes.Count /3.0); //Take 40% of old preferences
+                int part1Legnth = (int)Math.Floor(FavoriteRoutes.Count / 3.0); //Take 40% of old preferences
                 int part2Legnth = FavoriteRoutes.Count - part1Legnth;
 
 
 
-                
+
                 //cross genes 
                 var preferedRoutesChild1 = ch.FavoriteRoutes
-                                               .OrderBy(x => _crossoverMix? 0 : x.Key.Name )
+                                               .OrderBy(x => _crossoverMix ? 0 : x.Key.Name)
                                                .Take(part1Legnth)
                                                .Concat(this.FavoriteRoutes)//.Take(part1Legnth))
                                                .GroupBy(d => d.Key)
-                                               .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count>x.First().Value.Count? x.First().Value:x.Last().Value).ToList<ushort>()));
-                                               //.ToDictionary(x => x.Key, x => x.First().Value);
+                                               .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count > x.First().Value.Count ? x.First().Value : x.Last().Value).ToList<ushort>()));
+                //.ToDictionary(x => x.Key, x => x.First().Value);
                 var preferedRoutesChild2 = this.FavoriteRoutes
-                                               .OrderBy(x => _crossoverMix ? 0: x.Key.Name)
+                                               .OrderBy(x => _crossoverMix ? 0 : x.Key.Name)
                                                .Take(part1Legnth)
                                                .Concat(ch.FavoriteRoutes)//.Take(part1Legnth))
                                                .GroupBy(d => d.Key)
                                                .Select(x => new KeyValuePair<City, List<ushort>>(x.Key, (x.Last().Value.Count > x.First().Value.Count ? x.First().Value : x.Last().Value).ToList<ushort>()));
-                                                //.ToDictionary(x => x.Key, x => x.First().Value);
+                //.ToDictionary(x => x.Key, x => x.First().Value);
 
 
                 // replace parents wit children
-                if( kill parent )
-                this.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild1);
-                ch.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild2);
-                this.Path = GeneratePath(this.FavoriteRoutes);
-                ch.Path = GeneratePath(ch.FavoriteRoutes);
+                if (!_killBothParents)
+                {
+                    this.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild1);
+                    ch.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild2);
+                    this.Path = GeneratePath(this.FavoriteRoutes);
+                    ch.Path = GeneratePath(ch.FavoriteRoutes);
+                }
+                else
+                {
+                    var killedParent = r.Next(0, 2) == 0 ? ch : this;
+                    var choosenChildPref = r.Next(0, 2) == 0 ? preferedRoutesChild1 : preferedRoutesChild2;
+                    killedParent.FavoriteRoutes = new ConcurrentDictionary<City, List<ushort>>(preferedRoutesChild1); ;
+                    killedParent.Path = GeneratePath(killedParent.FavoriteRoutes);
+                }
             }
         }
         public override void Mutate()

@@ -49,6 +49,7 @@ namespace AlgorytmGenetyczny
         public KeyValuePair<string, ISelectionMethod> SelectedType { set; get; }
         public bool CrossoverMix { set; get; } = false;
         public double CrossoverRate { set; get; } = 0.75;
+        public bool KillBothParents { set; get; } = true;
         public double MutationRate { set; get; } = 0.15;
         public bool AutoShufling { set; get; } = true;
         public double RandomSelectionPortion { set; get; } = 0.15;
@@ -76,13 +77,15 @@ namespace AlgorytmGenetyczny
                 {
                     Fitness fitnessFunc = new Fitness(map.Count, false);
                     Population population = new Population(Queue[complited].PopulationCount,
-                                                           new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, Queue[complited].CrossoverMix),
+                                                           new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, Queue[complited].CrossoverMix, Queue[complited].KillBothParents),
                                                            fitnessFunc,
-                                                           Queue[complited].SelectionMethod);
-                    population.CrossoverRate = Queue[complited].CrossOver;
-                    population.MutationRate = Queue[complited].Mutation;
-                    population.RandomSelectionPortion = .7;
-                    population.AutoShuffling = false;
+                                                           Queue[complited].SelectionMethod)
+                                                           {
+                                                            CrossoverRate = Queue[complited].CrossOver,
+                                                            MutationRate = Queue[complited].Mutation,
+                                                            RandomSelectionPortion = Queue[complited].RandomSelectionPortion,
+                                                            AutoShuffling = Queue[complited].AutoShufling
+                                                           };
 
                     int i = 0;
                     bool needToStop = false;
@@ -135,8 +138,8 @@ namespace AlgorytmGenetyczny
         private void AddToQue(object sender, RoutedEventArgs e)
         {
             for(int i = 0; i< QueueCount; i++)
-                Queue.Add(new QueueData($"Evolution {count++}", new List<Result>(), PopulationCount, GenerationCount, SelectedType.Value,
-                            CrossoverMix, CrossoverRate, MutationRate, Migration, IslandsCount, MigrationCount, MigrationTime));
+                Queue.Add(new QueueData($"Evolution {count++}", new List<Result>(), PopulationCount, GenerationCount, SelectedType.Value,CrossoverMix, CrossoverRate,
+                                         KillBothParents, MutationRate, AutoShufling, RandomSelectionPortion, Migration, IslandsCount, MigrationCount, MigrationTime));
             if(runQue == null || runQue.IsCompleted)
             {
                 runQue = new Task(QueueTask);
@@ -151,10 +154,15 @@ namespace AlgorytmGenetyczny
 
             Fitness fitnessFunc = new Fitness(map.Count, false);
             Population population = new Population(PopulationCount,
-                                                   new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, CrossoverMix),
+                                                   new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, CrossoverMix, KillBothParents),
                                                    fitnessFunc,
-                                                  (ISelectionMethod)SelectedType.Value);
-
+                                                   (ISelectionMethod)SelectedType.Value)
+                                                    {
+                                                        CrossoverRate = CrossoverRate,
+                                                        MutationRate = MutationRate,
+                                                        RandomSelectionPortion = RandomSelectionPortion,
+                                                        AutoShuffling = AutoShufling
+                                                    };
 
             //Population population2 = new Population(PopulationCount,
             //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
@@ -192,10 +200,7 @@ namespace AlgorytmGenetyczny
             //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
             //                                       fitnessFunc,
             //                                      (ISelectionMethod)SelectedType.Value);
-            population.CrossoverRate = CrossoverRate;
-            population.MutationRate = MutationRate;
-            population.RandomSelectionPortion = .15;
-            population.AutoShuffling = true;
+
             //population2.CrossoverRate = CrossoverRate;
             //population2.MutationRate = MutationRate;
             //population2.RandomSelectionPortion = .7;

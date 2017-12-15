@@ -361,12 +361,46 @@
                                     </CheckBox>
                                 </WrapPanel>
                                 <WrapPanel>
+                                    <TextBlock  Text="Zabijanie obu rodziców?"/>
+                                    <CheckBox Width="50" IsEnabled="True"  x:Name="KillBothParentsChk" Padding="4,6,0,0" IsChecked="{Binding KillBothParents}">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type  CheckBox}}">
+                                                <Setter Property="Content" Value="Tak"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsChecked" Value="False">
+                                                        <Setter Property="Content" Value="Nie"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
+                                </WrapPanel>
+                                <WrapPanel>
+                                    <TextBlock  Text="Automatyczne desortowanie?"/>
+                                    <CheckBox Width="50" IsEnabled="True"  x:Name="AutoShufflingChk" Padding="4,6,0,0" IsChecked="{Binding AutoShufling}">
+                                        <CheckBox.Style>
+                                            <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type  CheckBox}}">
+                                                <Setter Property="Content" Value="Tak"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsChecked" Value="False">
+                                                        <Setter Property="Content" Value="Nie"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </CheckBox.Style>
+                                    </CheckBox>
+                                </WrapPanel>
+                                <WrapPanel>
                                     <TextBlock Text="Współczynnik krzyżowania:"/>
                                     <TextBox Controls:TextBoxHelper.IsSpellCheckContextMenuEnabled="True" Text="{Binding CrossoverRate}" />
                                 </WrapPanel>
                                 <WrapPanel>
                                     <TextBlock Text="Współczynnik Mutacji:"/>
                                     <TextBox Text="{Binding MutationRate}" />
+                                </WrapPanel>
+                                <WrapPanel>
+                                    <TextBlock Text="Random Selection portion:"/>
+                                    <TextBox Controls:TextBoxHelper.IsSpellCheckContextMenuEnabled="True" Text="{Binding RandomSelectionPortion}" />
                                 </WrapPanel>
                                 <WrapPanel>
                                     <TextBlock  Text="Izolowane wyspy?"/>
