@@ -39,10 +39,12 @@ namespace AlgorytmGenetyczny.Classes
         public double RandomSelectionPortion { get; internal set; }
         public bool AutoShufling { get; internal set; }
         public bool KillBothParents { get; internal set; }
+        public ushort GroupID { get; internal set; }
 
         public QueueData(string Name, List<Result> Results, int PopulationCount, int GenerationCount, ISelectionMethod SelectionMethod,
                                      bool CrossoverMix, double CrossOver, bool KillBothParents, double Mutation, bool AutoShufling,
-                                     double RandomSelectionPortion, bool Migration, int IslandsCount, int MigrationCount, int MigrationTime)
+                                     double RandomSelectionPortion, bool Migration, int IslandsCount, int MigrationCount, int MigrationTime,
+                                     ushort GroupID)
         {
             this.Name = Name;
             this.Results = Results;
@@ -59,6 +61,7 @@ namespace AlgorytmGenetyczny.Classes
             this.RandomSelectionPortion = RandomSelectionPortion;
             this.AutoShufling = AutoShufling;
             this.KillBothParents = KillBothParents;
+            this.GroupID = GroupID;
 
         }
 

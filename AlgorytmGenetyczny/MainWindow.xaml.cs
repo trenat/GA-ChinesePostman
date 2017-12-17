@@ -47,10 +47,11 @@ namespace AlgorytmGenetyczny
             }
         }
         public KeyValuePair<string, ISelectionMethod> SelectedType { set; get; }
-        public bool CrossoverMix { set; get; } = false;
         public double CrossoverRate { set; get; } = 0.75;
-        public bool KillBothParents { set; get; } = true;
         public double MutationRate { set; get; } = 0.15;
+
+        public bool CrossoverMix { set; get; } = false;
+        public bool KillBothParents { set; get; } = true;
         public bool AutoShufling { set; get; } = true;
         public double RandomSelectionPortion { set; get; } = 0.15;
 
@@ -80,19 +81,20 @@ namespace AlgorytmGenetyczny
                                                            new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, Queue[complited].CrossoverMix, Queue[complited].KillBothParents),
                                                            fitnessFunc,
                                                            Queue[complited].SelectionMethod)
-                                                           {
-                                                            CrossoverRate = Queue[complited].CrossOver,
-                                                            MutationRate = Queue[complited].Mutation,
-                                                            RandomSelectionPortion = Queue[complited].RandomSelectionPortion,
-                                                            AutoShuffling = Queue[complited].AutoShufling
-                                                           };
+                    {
+                        CrossoverRate = Queue[complited].CrossOver,
+                        MutationRate = Queue[complited].Mutation,
+                        RandomSelectionPortion = Queue[complited].RandomSelectionPortion,
+                        AutoShuffling = Queue[complited].AutoShufling
+                    };
 
                     int i = 0;
                     bool needToStop = false;
                     while (!needToStop)
                     {
                         population.RunEpoch();
-                        Queue[complited].Results.Add(new Result((population.BestChromosome as Chromosome).Path,
+                        Queue[complited].Results.Add(new Result(i,
+                                                                (population.BestChromosome as Chromosome).Path,
                                                                 population.BestChromosome.Fitness,
                                                                 population.FitnessAvg,
                                                                 fitnessFunc.GetLength(population.BestChromosome),
@@ -101,7 +103,7 @@ namespace AlgorytmGenetyczny
                         System.Diagnostics.Debug.WriteLine("Best path: " + String.Join(",", (population.BestChromosome as Chromosome).Path) + $"\nBest fit: {population.BestChromosome.Fitness}");
                         System.Diagnostics.Debug.WriteLine("Avarge fit: " + population.FitnessAvg);
                         System.Diagnostics.Debug.WriteLine("Best length: " + fitnessFunc.GetLength(population.BestChromosome));
-                        System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count());
+                        System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count() + $"\nGeneartion: {i}");
 
                         if (i > Queue[complited].GenerationCount)
                             break;
@@ -134,18 +136,20 @@ namespace AlgorytmGenetyczny
 
         static int count = 0;
         private int complited = 0;
+        private ushort groupID = 0;
         private Task runQue;
         private void AddToQue(object sender, RoutedEventArgs e)
         {
-            for(int i = 0; i< QueueCount; i++)
-                Queue.Add(new QueueData($"Evolution {count++}", new List<Result>(), PopulationCount, GenerationCount, SelectedType.Value,CrossoverMix, CrossoverRate,
-                                         KillBothParents, MutationRate, AutoShufling, RandomSelectionPortion, Migration, IslandsCount, MigrationCount, MigrationTime));
-            if(runQue == null || runQue.IsCompleted)
+            groupID++;
+            for (int i = 0; i < QueueCount; i++)
+                Queue.Add(new QueueData($"Evolution {count++}", new List<Result>(), PopulationCount, GenerationCount, SelectedType.Value, CrossoverMix, CrossoverRate,
+                                         KillBothParents, MutationRate, AutoShufling, RandomSelectionPortion, Migration, IslandsCount, MigrationCount, MigrationTime, groupID));
+            if (runQue == null || runQue.IsCompleted)
             {
                 runQue = new Task(QueueTask);
                 runQue.Start();
             }
-            
+
         }
 
 
@@ -157,12 +161,12 @@ namespace AlgorytmGenetyczny
                                                    new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount, CrossoverMix, KillBothParents),
                                                    fitnessFunc,
                                                    (ISelectionMethod)SelectedType.Value)
-                                                    {
-                                                        CrossoverRate = CrossoverRate,
-                                                        MutationRate = MutationRate,
-                                                        RandomSelectionPortion = RandomSelectionPortion,
-                                                        AutoShuffling = AutoShufling
-                                                    };
+            {
+                CrossoverRate = CrossoverRate,
+                MutationRate = MutationRate,
+                RandomSelectionPortion = RandomSelectionPortion,
+                AutoShuffling = AutoShufling
+            };
 
             //Population population2 = new Population(PopulationCount,
             //                                       new Chromosome(Cities, r, (ushort)r.Next(CitiesCount), true, (ushort)ConnectionsCount),
@@ -298,7 +302,7 @@ namespace AlgorytmGenetyczny
                 System.Diagnostics.Debug.WriteLine("Best path: " + String.Join(",", (population.BestChromosome as Chromosome).Path) + $"\nBest fit: {population.BestChromosome.Fitness}");
                 System.Diagnostics.Debug.WriteLine("Avarge fit: " + population.FitnessAvg);
                 System.Diagnostics.Debug.WriteLine("Best length: " + fitnessFunc.GetLength(population.BestChromosome));
-                System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count() + $"Geneartion: {i}");
+                System.Diagnostics.Debug.WriteLine("Edges visited: " + (population.BestChromosome as Chromosome).Path.Count() + $"\nGeneartion: {i}");
                 // display current path
                 //             ushort[] bestValue = ((ShortArrayChromosome)population.BestChromosome).Value;
                 if (i > GenerationCount)
@@ -479,6 +483,8 @@ namespace AlgorytmGenetyczny
                                   + data.CostToTarget);
                 }
                 File.WriteAllText(dialog.FileName, stringB.ToString());
+
+
             }
 
         }
@@ -518,6 +524,138 @@ namespace AlgorytmGenetyczny
 
                 MakeMap();
             }
+        }
+
+        private void SaveQueData(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.FileName = "Data";
+            dialog.DefaultExt = ".csv";
+            dialog.Filter = "csv |*.csv";
+            if (dialog.ShowDialog() == true)
+            {
+                #region AllData
+                var stringB = new StringBuilder();
+                foreach (var data in Queue)
+                {
+                    stringB.AppendLine("Name ;"
+                                        + "GenerationCount ;"
+                                        + "PopulationCount ;"
+                                        + "SelectionMethod ;"
+                                        + "CrossOver ;"
+                                        + "Mutation ;"
+                                        + "CrossoverMix ;"
+                                        + "AutoShufling ;"
+                                        + "KillBothParents ;"
+                                        + "RandomSelectionPortion ;");
+
+                    stringB.AppendLine(data.Name + ";"
+                                  + data.GenerationCount + ";"
+                                  + data.PopulationCount + ";"
+                                  + data.SelectionMethod + ";"
+                                  + data.CrossOver + ";"
+                                  + data.Mutation + ";"
+                                  + data.CrossoverMix + ";"
+                                  + data.IslandsCount + ";"
+                                  + data.AutoShufling + ";"
+                                  + data.KillBothParents + ";"
+                                  + data.RandomSelectionPortion + ";");
+                                  //+ data.Migration + ";"
+                                  //+ data.MigrationCount + ";"
+                                  //+ data.MigrationTime + ";");
+
+                    stringB.AppendLine("GenerationNumber;" +
+                                        "BestLength;" +
+                                        "EdgesVisited;" +
+                                        "BestFit;" +
+                                        "AvargeFit;");
+                    foreach (var result in data.Results)
+                    {
+                        stringB.AppendLine(result.GenerationNumber + ";"
+                                            + result.BestLength + ";"
+                                            + result.EdgesVisited + ";"
+                                            + result.BestFit + ";"
+                                            + result.AvargeFit + ";");
+
+                    }
+                    stringB.AppendLine(";");
+                }
+                File.WriteAllText(dialog.FileName, stringB.ToString());
+                #endregion
+                #region Grouped 
+
+                var list = Queue.GroupBy(x => x.GroupID)
+                                 .Select(group => (
+                                   Name: group.First().Name + " " + group.Last().Name,
+                                         group.First().GenerationCount,
+                                         group.First().PopulationCount,
+                                         group.First().SelectionMethod,
+                                         group.First().CrossOver,
+                                         group.First().Mutation,
+                                         group.First().CrossoverMix,
+                                         group.First().AutoShufling,
+                                         group.First().KillBothParents,
+                                         group.First().RandomSelectionPortion,
+                                         group.Aggregate((a, b) =>
+                                                            {
+                                                                a.Results = a.Results.Zip(b.Results, (c, d) => c + d).ToList();
+                                                                return a;
+                                                            })
+                                                            .Results.Select(x => x / group.Count())
+                                  ))
+                                  .ToList();
+
+
+                var stringGrouped = new StringBuilder();
+                foreach (var data in list)
+                {
+
+                    stringGrouped.AppendLine("data.Name ;"
+                                          + "data.GenerationCount ;" 
+                                          + "data.PopulationCount ;" 
+                                          + "data.SelectionMethod ;" 
+                                          + "data.CrossOver ;" 
+                                          + "data.Mutation ;" 
+                                          + "data.CrossoverMix ;" 
+                                          + "data.AutoShufling ;" 
+                                          + "data.KillBothParents ;" 
+                                          + "data.RandomSelectionPortion ;" );
+
+                    stringGrouped.AppendLine(data.Name + ";"
+                                          + data.GenerationCount + ";"
+                                          + data.PopulationCount + ";"
+                                          + data.SelectionMethod + ";"
+                                          + data.CrossOver + ";"
+                                          + data.Mutation + ";"
+                                          + data.CrossoverMix + ";"
+                                          + data.AutoShufling + ";"
+                                          + data.KillBothParents + ";"
+                                          + data.RandomSelectionPortion + ";");
+
+                    stringGrouped.AppendLine("GenerationNumber;" +
+                                            "BestLength;" +
+                                            "EdgesVisited;" +
+                                            "BestFit;" +
+                                            "AvargeFit;");
+
+
+                    foreach (var result in data.Item11)
+                    {
+                        stringGrouped.AppendLine(result.GenerationNumber + ";"
+                                                + result.BestLength + ";"
+                                                + result.EdgesVisited + ";"
+                                                + result.BestFit + ";"
+                                                + result.AvargeFit + ";");
+
+                    }
+                    stringGrouped.AppendLine(";");
+                }
+
+
+                File.WriteAllText(dialog.FileName, stringB.ToString());
+                File.WriteAllText(dialog.FileName.Replace(".", "_grouped."), stringGrouped.ToString());
+            }
+            #endregion
         }
     }
 }
